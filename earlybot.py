@@ -10,7 +10,16 @@ mainID = "260863628582977547"
 
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
-ourBot = discord.Client
+
+class Aphrodite(discord.Client):
+    
+    def wait_for_message(self, message):
+        super(discord.Client, self).wait_for_message()
+        author = message.author
+        if message.content.startswith("!q"):
+            self.logout()
+            
+ourBot = Aphrodite()
 
 @asyncio.coroutine
 def handle_incoming(reader, writer):
