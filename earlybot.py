@@ -26,10 +26,13 @@ def handle_incoming(reader, writer):
     
 @asyncio.coroutine
 def handle_queue():
-        
-    queuedMsg = queue.get()
+    
+    print("Starting handle_queue()")
+    queuedMsg = yield from queue.get()
+    print("Message stuffed into variable.")
     print(queuedMsg)
-
+    print("Done!")
+    
 def main():
  
     serverCoro = asyncio.start_server(handle_incoming, host, port, loop=loop)
@@ -37,6 +40,7 @@ def main():
 
     print("Serving on {}".format(server.sockets[0].getsockname()))
     try:
+        loop.create_task(handle_queue())
         loop.run_forever()
     except KeyboardInterrupt:
         pass
