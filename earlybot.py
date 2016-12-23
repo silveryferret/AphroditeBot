@@ -10,7 +10,7 @@ mainID = "260863628582977547"
 
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
-ourBot = Discord.client(loop=loop)
+ourBot = discord.Client
 
 @asyncio.coroutine
 def handle_incoming(reader, writer):
@@ -30,12 +30,9 @@ def handle_incoming(reader, writer):
 @asyncio.coroutine
 def handle_queue():
     
-    print("Starting handle_queue()")
     queuedMsg = yield from queue.get()
     loop.create_task(handle_queue())
-    print("Message stuffed into variable.")
     print(queuedMsg)
-    print("Done!")
     
 def main():
  
@@ -44,7 +41,7 @@ def main():
 
     print("Serving on {}".format(server.sockets[0].getsockname()))
     try:
-        loop.create_task(ourBot.login(token))
+        loop.create_task(ourBot.start(token))
         loop.create_task(handle_queue())
         loop.run_forever()
     except KeyboardInterrupt:
