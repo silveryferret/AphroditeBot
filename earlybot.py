@@ -13,11 +13,14 @@ queue = asyncio.Queue(loop=loop)
 
 class Aphrodite(discord.Client):
     
-    def wait_for_message(self, message):
-        super(discord.Client, self).wait_for_message()
+    @asyncio.coroutine
+    def on_message(self, message):
+    
         author = message.author
         if message.content.startswith("!q"):
-            self.logout()
+            yield from self.send_message(message.channel, "See ya, %s!" % author)
+            yield from self.logout()
+            yield from loop.stop()
             
 ourBot = Aphrodite()
 
@@ -56,9 +59,11 @@ def main():
     except KeyboardInterrupt:
         pass
 
+"""
     server.close()
     loop.run_until_complete(server.wait_closed())
     loop.close()
+"""
     
 if __name__ == "__main__":
     main()
