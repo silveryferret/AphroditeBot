@@ -3,6 +3,7 @@ import asyncio
 import struct
 import ast
 import urllib.parse
+import BotCommands
 
 host = "localhost"
 port = 45678
@@ -15,7 +16,7 @@ triggerString = "!"
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
 
-def process_command(message):
+def parse_command(message, client):
     
     if message.startswith(triggerString) == False:
         return
@@ -25,7 +26,35 @@ def process_command(message):
     parameter = i.split(" ")[1]
     cmdMsg = i.split(" ", maxsplit=2)[2]
     
+    if command == "ping":
+        return BotCommands.Ping(client)
+        
+    if command == "players":
+        return BotCommands.Status(client)
+        
+    if command == "status":
+        return BotCommands.Status(client)
+        
+    if command == "manifest":
+        return BotCommands.Manifest(client)
+        
+    if command == "revision":
+        return BotCommands.Revision(client)
     
+    if command == "laws":
+        return BotCommands.Laws(client)
+        
+    if command == "info":
+        return BotCommands.Info(client)
+        
+    if command == "msg":
+        return BotCommands.AdminMsg(client)
+        
+    if command == "notes":
+        return BotCommands.Notesclient)
+        
+    if command == "age":
+        return BotCommands.Age(client)
 
 class Aphrodite(discord.Client):
     
@@ -33,22 +62,7 @@ class Aphrodite(discord.Client):
     def on_message(self, message):
     
         author = message.author
-        if message.content.startswith("%sq" % triggerString):
-            yield from self.send_message(message.channel, "See ya, %s!" % author)
-            yield from self.logout()
-            loop.stop()
-            
-        elif message.content.startswith("%sstatus" % triggerString):
-            queryString = yield from handle_outgoing("status", loop)
-            queryString = queryString.decode()
-            ourDict = urllib.parse.parse_qs(queryString)
-            print(ourDict)
-            response = "This is a test."
-            yield from self.send_message(message.channel, response)            
-            
-        elif message.content.startswith("%smanifest" % triggerString):
-            response = yield from handle_outgoing("manifest", loop)
-            yield from self.send_message(message.channel, response)
+        parse_message(message.contents, 
             
 ourBot = Aphrodite()
 
