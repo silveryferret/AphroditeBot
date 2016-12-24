@@ -16,36 +16,45 @@ triggerString = "!"
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
 
-def parse_command(message, client):
+@asyncio.coroutine
+def parse_command(message, client, loop):
     
     if message.startswith(triggerString) == False:
         return
     
     i = message.strip(triggerString)
+    print(i)
     command = i.split(" ")[0]
+    print(command)
     parameter = i.split(" ")[1]
+    print (parameter)
     cmdMsg = i.split(" ", maxsplit=2)[2]
+    print (cmdMsg)
     
     if command == "ping":
-        return BotCommands.Ping(client)
-    if command == "players":
-        return BotCommands.Status(client)
-    if command == "status":
-        return BotCommands.Status(client)
-    if command == "manifest":
-        return BotCommands.Manifest(client)
-    if command == "revision":
-        return BotCommands.Revision(client)
-    if command == "laws":
-        return BotCommands.Laws(client)
-    if command == "info":
-        return BotCommands.Info(client)
-    if command == "msg":
-        return BotCommands.AdminMsg(client)
-    if command == "notes":
-        return BotCommands.Notes(client)
-    if command == "age":
-        return BotCommands.Age(client)
+        return BotCommands.Ping(client, loop, message)
+    elif command == "players":
+        return BotCommands.Status(client, loop, message)
+    elif command == "status":
+        return BotCommands.Status(client, loop, message)
+    elif command == "manifest":
+        return BotCommands.Manifest(client, loop, message)
+    elif command == "revision":
+        return BotCommands.Revision(client, loop, message)
+    elif command == "laws":
+        return BotCommands.Laws(client, loop, message)
+    elif command == "info":
+        return BotCommands.Info(client, loop, message)
+    elif command == "msg":
+        return BotCommands.AdminMsg(client, loop, message)
+    elif command == "notes":
+        return BotCommands.Notes(client, loop, message)
+    elif command == "age":
+        return BotCommands.Age(client, loop, message)
+    elif command == "help":
+        return BotCommands.Help(client, loop, message)
+    else:
+        return BotCommands.Command(client, loop, message)
 
 class Aphrodite(discord.Client):
     
@@ -53,7 +62,8 @@ class Aphrodite(discord.Client):
     def on_message(self, message):
     
         author = message.author
-        cmd = parse_message(message.contents, self)
+        cmd = yield from parse_command(message.content, self, loop)
+        yield from cmd.do_command()
         
             
 ourBot = Aphrodite()
@@ -93,13 +103,9 @@ def handle_incoming(reader, writer):
 
     data = yield from reader.read(-1)
     message = data.decode()
-    addr = writer.get_extra_info('peername')
     cleanMessage = " ".join(ast.literal_eval(message))
 
     loop.create_task(queue.put(cleanMessage))
-    
-    writer.write(data)
-    yield from writer.drain()
     
 @asyncio.coroutine
 def handle_queue():
