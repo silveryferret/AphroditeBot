@@ -28,31 +28,22 @@ def parse_command(message, client):
     
     if command == "ping":
         return BotCommands.Ping(client)
-        
     if command == "players":
         return BotCommands.Status(client)
-        
     if command == "status":
         return BotCommands.Status(client)
-        
     if command == "manifest":
         return BotCommands.Manifest(client)
-        
     if command == "revision":
         return BotCommands.Revision(client)
-    
     if command == "laws":
         return BotCommands.Laws(client)
-        
     if command == "info":
         return BotCommands.Info(client)
-        
     if command == "msg":
         return BotCommands.AdminMsg(client)
-        
     if command == "notes":
         return BotCommands.Notesclient)
-        
     if command == "age":
         return BotCommands.Age(client)
 
@@ -62,7 +53,8 @@ class Aphrodite(discord.Client):
     def on_message(self, message):
     
         author = message.author
-        parse_message(message.contents, 
+        cmd = parse_message(message.contents, self)
+        
             
 ourBot = Aphrodite()
 
