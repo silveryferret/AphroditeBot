@@ -2,6 +2,7 @@ import discord
 import asyncio
 import struct
 import ast
+import urllib.parse
 
 host = "localhost"
 port = 4213
@@ -29,6 +30,8 @@ class Aphrodite(discord.Client):
             
 ourBot = Aphrodite()
 
+
+
 def formatpacket(msg):
     return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
     b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
@@ -44,7 +47,7 @@ def handle_outgoing(payload, loop):
     packet = formatpacket(payload)
     print("Packet formatted.")    
     
-    writer.write(bytes(payload, "ascii"))
+    writer.write(packet)
     print("Packet sent.")
     
     received = yield from reader.read(-1)
