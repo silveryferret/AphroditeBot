@@ -19,18 +19,10 @@ queue = asyncio.Queue(loop=loop)
 @asyncio.coroutine
 def parse_command(message, client, loop):
     
-    if message.startswith(triggerString) == False:
+    if message.content.startswith(triggerString) == False:
         return
-    
-    i = message.strip(triggerString)
-    command = i.split(" ")[0]
-    print(command)
-    if len(i.split(" ")) <= 2:
-        parameter = i.split(" ")[1]
-        print (parameter)
-        if len(i.split(" ", maxsplit=2)) <= 3:
-            cmdMsg = i.split(" ", maxsplit=2)[2]
-            print (cmdMsg)
+        
+    command = BotCommands.get_command(message)
     
     if command == "ping":
         return BotCommands.Ping(client, loop, message)
@@ -63,7 +55,7 @@ class Aphrodite(discord.Client):
     def on_message(self, message):
     
         author = message.author
-        cmd = yield from parse_command(message.content, self, loop)
+        cmd = yield from parse_command(message, self, loop)
         yield from cmd.do_command()
         
             

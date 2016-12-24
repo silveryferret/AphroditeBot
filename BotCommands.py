@@ -1,5 +1,7 @@
 import discord
 import asyncio
+
+triggerString = "!"
 """
 @asyncio.coroutine
 def handle_outgoing(payload, loop):
@@ -45,6 +47,20 @@ def handle_outgoing(payload, loop):
     print("Closing socket.")
     writer.close()
     print("Socket closed.")
+    
+def get_command(messageobj):
+
+    i = messageobj.content.strip(triggerString)
+    command = i.split(" ")[0]
+    print(command)
+    if len(i.split(" ")) >= 2:
+        parameter = i.split(" ")[1]
+        print (parameter)
+        if len(i.split(" ", maxsplit=2)) >= 3:
+            cmdMsg = i.split(" ", maxsplit=2)[2]
+            print (cmdMsg)
+            
+    return command
 
 class Command(object):
     
@@ -55,7 +71,8 @@ class Command(object):
         
     @asyncio.coroutine
     def do_command(self):
-        yield from client.send_message(client.message.channel, "Doing command: %s" % message.split(" ")[0])
+        yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
+        command = get_command(self.message)
         output = handle_outgoing(command, loop)
         print(output)
 
