@@ -26,7 +26,13 @@ class Aphrodite(discord.Client):
             loop.stop()
             
         elif message.content.startswith("!status"):
-            yield from handle_outgoing("status", loop)
+            response = yield from handle_outgoing("status", loop)
+            self.send_message(message.channel, response)
+            
+            
+        elif message.content.startswith("!manifest"):
+            response = yield from handle_outgoing("manifest", loop)
+            self.send_message(message.channel, response)
             
 ourBot = Aphrodite()
 
@@ -50,14 +56,25 @@ def handle_outgoing(payload, loop):
     writer.write(packet)
     print("Packet sent.")
     
-    received = yield from reader.read(-1)
-    print("Packet received.")
+    headerReceived = yield from reader.read(2)
+    print("Header received.")
+    if headerReceived != b"\x00\x83":
+        print("Unexpected packet.")
+        
+    packetLength = yield from reader.read(2)
+    print(type(packetLength))
+    packetLength = int.from_bytes(packetLength, "big")
+    print(packetLength)
+    received = yield from reader.read(packetLength)
+    received = received[1:-1]
     
     print(received)
+    print("")
     
     print("Closing socket.")
     writer.close()
     print("Socket closed.")
+    return received
     
 
 @asyncio.coroutine
