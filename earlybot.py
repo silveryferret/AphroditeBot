@@ -5,7 +5,7 @@ import ast
 import urllib.parse
 
 host = "localhost"
-port = 4213
+port = 45678
 gameport = 61926
 token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
 ahelpID = "260863607661658112"
@@ -27,53 +27,42 @@ class Aphrodite(discord.Client):
             
         elif message.content.startswith("!status"):
             response = yield from handle_outgoing("status", loop)
-            self.send_message(message.channel, response)
+            yield from self.send_message(message.channel, response)
             
             
         elif message.content.startswith("!manifest"):
             response = yield from handle_outgoing("manifest", loop)
-            self.send_message(message.channel, response)
+            yield from self.send_message(message.channel, response)
             
 ourBot = Aphrodite()
 
+def admin_message(message):
+    if message.startswith("Request for Help") or message.startswith("Reply") or message.endswith("no more admins online."):
+        return True
 
-
-def formatpacket(msg):
+def format_packet(msg):
     return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
     b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
     
 @asyncio.coroutine
 def handle_outgoing(payload, loop):
 
-    print("Entering handle_outgoing")
     
     reader, writer = yield from asyncio.open_connection(host, gameport, loop=loop)
-    print("Connection opened.")    
-    
-    packet = formatpacket(payload)
-    print("Packet formatted.")    
+    packet = format_packet(payload)
     
     writer.write(packet)
-    print("Packet sent.")
     
     headerReceived = yield from reader.read(2)
-    print("Header received.")
     if headerReceived != b"\x00\x83":
         print("Unexpected packet.")
         
     packetLength = yield from reader.read(2)
-    print(type(packetLength))
     packetLength = int.from_bytes(packetLength, "big")
-    print(packetLength)
     received = yield from reader.read(packetLength)
     received = received[1:-1]
     
-    print(received)
-    print("")
-    
-    print("Closing socket.")
     writer.close()
-    print("Socket closed.")
     return received
     
 
@@ -90,14 +79,12 @@ def handle_incoming(reader, writer):
     writer.write(data)
     yield from writer.drain()
     
-    print("Close the client socket")
-    
 @asyncio.coroutine
 def handle_queue():
     
     queuedMsg = yield from queue.get()
     loop.create_task(handle_queue())
-    if queuedMsg.startswith("Request for Help") or queuedMsg.startswith("Reply"):
+    if admin_message(queuedMsg):
         yield from ourBot.send_message(ourBot.get_channel(ahelpID), queuedMsg)
     else:
         yield from ourBot.send_message(ourBot.get_channel(mainID), queuedMsg)
@@ -106,20 +93,13 @@ def main():
  
     serverCoro = asyncio.start_server(handle_incoming, host, port, loop=loop)
     server = loop.run_until_complete(serverCoro)
-
-    print("Serving on {}".format(server.sockets[0].getsockname()))
+    
     try:
         loop.create_task(ourBot.start(token))
         loop.create_task(handle_queue())
         loop.run_forever()
     except KeyboardInterrupt:
         pass
-
-"""
-    server.close()
-    loop.run_until_complete(server.wait_closed())
-    loop.close()
-"""
     
 if __name__ == "__main__":
     main()
