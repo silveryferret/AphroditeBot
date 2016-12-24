@@ -37,15 +37,21 @@ def formatpacket(msg):
 def handle_outgoing(payload, loop):
 
     print("Entering handle_outgoing")
+    
     reader, writer = yield from asyncio.open_connection(host, gameport, loop=loop)
     print("Connection opened.")    
+    
     packet = formatpacket(payload)
     print("Packet formatted.")    
+    
     writer.write(bytes(payload, "ascii"))
     print("Packet sent.")
+    
     received = yield from reader.read(-1)
     print("Packet received.")
+    
     print(received)
+    
     print("Closing socket.")
     writer.close()
     print("Socket closed.")
