@@ -43,7 +43,7 @@ def parse_command(message, client):
     if command == "msg":
         return BotCommands.AdminMsg(client)
     if command == "notes":
-        return BotCommands.Notesclient)
+        return BotCommands.Notes(client)
     if command == "age":
         return BotCommands.Age(client)
 
