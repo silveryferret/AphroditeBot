@@ -10,9 +10,22 @@ gameport = 61926
 token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
 ahelpID = "260863607661658112"
 mainID = "260863628582977547"
+triggerString = "!"
 
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
+
+def process_command(message):
+    
+    if message.startswith(triggerString) == False:
+        return
+    
+    i = message.strip(triggerString)
+    command = i.split(" ")[0]
+    parameter = i.split(" ")[1]
+    cmdMsg = i.split(" ", maxsplit=2)[2]
+    
+    
 
 class Aphrodite(discord.Client):
     
@@ -20,17 +33,20 @@ class Aphrodite(discord.Client):
     def on_message(self, message):
     
         author = message.author
-        if message.content.startswith("!q"):
+        if message.content.startswith("%sq" % triggerString):
             yield from self.send_message(message.channel, "See ya, %s!" % author)
             yield from self.logout()
             loop.stop()
             
-        elif message.content.startswith("!status"):
-            response = yield from handle_outgoing("status", loop)
-            yield from self.send_message(message.channel, response)
+        elif message.content.startswith("%sstatus" % triggerString):
+            queryString = yield from handle_outgoing("status", loop)
+            queryString = queryString.decode()
+            ourDict = urllib.parse.parse_qs(queryString)
+            print(ourDict)
+            response = "This is a test."
+            yield from self.send_message(message.channel, response)            
             
-            
-        elif message.content.startswith("!manifest"):
+        elif message.content.startswith("%smanifest" % triggerString):
             response = yield from handle_outgoing("manifest", loop)
             yield from self.send_message(message.channel, response)
             
