@@ -1,8 +1,19 @@
 import discord
 import asyncio
+import struct
 
+host = "localhost"
+port = 45678
+gameport = 61926
+token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
+ahelpID = "260863607661658112"
+mainID = "260863628582977547"
 triggerString = "!"
-"""
+
+def format_packet(msg):
+    return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
+    b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
+
 @asyncio.coroutine
 def handle_outgoing(payload, loop):
 
@@ -23,42 +34,15 @@ def handle_outgoing(payload, loop):
     
     writer.close()
     return received
-"""
-
-@asyncio.coroutine
-def handle_outgoing(payload, loop):
-
-    print("Entering handle_outgoing")
-    
-    reader, writer = yield from asyncio.open_connection(host, gameport, loop=loop)
-    print("Connection opened.")    
-    
-    packet = formatpacket(payload)
-    print("Packet formatted.")    
-    
-    writer.write(bytes(payload, "ascii"))
-    print("Packet sent.")
-    
-    received = yield from reader.read(-1)
-    print("Packet received.")
-    
-    print(received)
-    
-    print("Closing socket.")
-    writer.close()
-    print("Socket closed.")
     
 def get_command(messageobj):
 
     i = messageobj.content.strip(triggerString)
     command = i.split(" ")[0]
-    print(command)
     if len(i.split(" ")) >= 2:
         parameter = i.split(" ")[1]
-        print (parameter)
         if len(i.split(" ", maxsplit=2)) >= 3:
             cmdMsg = i.split(" ", maxsplit=2)[2]
-            print (cmdMsg)
             
     return command
 
@@ -73,7 +57,7 @@ class Command(object):
     def do_command(self):
         yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
         command = get_command(self.message)
-        output = handle_outgoing(command, loop)
+        output = yield from handle_outgoing(command, self.loop)
         print(output)
 
 class Ping(Command):

@@ -21,7 +21,7 @@ def parse_command(message, client, loop):
     
     if message.content.startswith(triggerString) == False:
         return
-        
+    
     command = BotCommands.get_command(message)
     
     if command == "ping":
@@ -58,16 +58,11 @@ class Aphrodite(discord.Client):
         cmd = yield from parse_command(message, self, loop)
         yield from cmd.do_command()
         
-            
 ourBot = Aphrodite()
 
 def admin_message(message):
     if message.startswith("Request for Help") or message.startswith("Reply") or message.endswith("no more admins online."):
         return True
-
-def format_packet(msg):
-    return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
-    b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
     
 @asyncio.coroutine
 def handle_outgoing(payload, loop):
