@@ -1,10 +1,12 @@
 import discord
 import asyncio
 import struct
+import ast
+import urllib.parse
 
-host = "localhost"
+host = "visiblebulge.space"
 port = 45678
-gameport = 61926
+gameport = 8000
 token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
 ahelpID = "260863607661658112"
 mainID = "260863628582977547"
@@ -35,9 +37,9 @@ def handle_outgoing(payload, loop):
     writer.close()
     return received
     
-def get_command(messageobj):
+def get_command(messageObj):
 
-    i = messageobj.content.strip(triggerString)
+    i = messageObj.content.strip(triggerString)
     command = i.split(" ")[0]
     if len(i.split(" ")) >= 2:
         parameter = i.split(" ")[1]
@@ -45,19 +47,41 @@ def get_command(messageobj):
             cmdMsg = i.split(" ", maxsplit=2)[2]
             
     return command
+    
+def parse_status(queryString):
+    
+    statusDict = urllib.parse.parse_qs(queryString)
+    for key in statusDict:
+        if "version" in key:
+            version = statusDict[key]
+        if "mode" in key:
+            gamemode = statusDict[key]
+        if "players" in key:
+            playercount = statusDict[key]
+        if "admins" in key:
+            admincount = statusDict[key]
+        if "player" in key:
+            playerList += statusDict[key]
+        if "stationtime" in key:
+            stationTime = statusDict[key]
+        if "roundduration" in key:
+            roundDuration = statusDict[key]
+        
+    
 
 class Command(object):
     
     def __init__(self, client, loop, message):
-        client = self.client
-        loop = self.loop
-        message = self.message
+        self.client = client
+        self.loop = loop
+        self.message = message
         
     @asyncio.coroutine
     def do_command(self):
         yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
         command = get_command(self.message)
         output = yield from handle_outgoing(command, self.loop)
+        output = output.decode()
         print(output)
 
 class Ping(Command):
@@ -66,6 +90,15 @@ class Ping(Command):
         self.client = client
         self.loop = loop
         self.message = message
+        
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            command = get_command(self.message)
+            yield from handle_outgoing(command, self.loop)
+            yield from self.client.send_message(self.message.channel, "Server is online.")
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
     
 class Players(Command):
     
@@ -143,3 +176,9 @@ class InvalidCommand(Command):
         self.client = client
         self.loop = loop
         self.message = message
+        
+class DoNothing(Command):
+
+    @asyncio.coroutine
+    def do_command(self):
+        pass

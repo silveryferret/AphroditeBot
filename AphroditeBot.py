@@ -18,11 +18,11 @@ queue = asyncio.Queue(loop=loop)
 
 @asyncio.coroutine
 def parse_command(message, client, loop):
+        
+    command = BotCommands.get_command(message)
     
     if message.content.startswith(triggerString) == False:
-        return
-    
-    command = BotCommands.get_command(message)
+        return BotCommands.DoNothing(client, loop, message)
     
     if command == "ping":
         return BotCommands.Ping(client, loop, message)
@@ -50,11 +50,19 @@ def parse_command(message, client, loop):
         return BotCommands.Command(client, loop, message)
 
 class Aphrodite(discord.Client):
+
+    @asyncio.coroutine
+    def on_ready(self):
+        print("Bot is ready.")
     
     @asyncio.coroutine
     def on_message(self, message):
     
         author = message.author
+        
+        if author.id == self.user.id:
+            return
+        
         cmd = yield from parse_command(message, self, loop)
         yield from cmd.do_command()
         
