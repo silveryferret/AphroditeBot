@@ -23,13 +23,14 @@ def parse_command(message, client, loop):
         return
     
     i = message.strip(triggerString)
-    print(i)
     command = i.split(" ")[0]
     print(command)
-    parameter = i.split(" ")[1]
-    print (parameter)
-    cmdMsg = i.split(" ", maxsplit=2)[2]
-    print (cmdMsg)
+    if len(i.split(" ")) <= 2:
+        parameter = i.split(" ")[1]
+        print (parameter)
+        if len(i.split(" ", maxsplit=2)) <= 3:
+            cmdMsg = i.split(" ", maxsplit=2)[2]
+            print (cmdMsg)
     
     if command == "ping":
         return BotCommands.Ping(client, loop, message)

@@ -49,13 +49,13 @@ def handle_outgoing(payload, loop):
 class Command(object):
     
     def __init__(self, client, loop, message):
-        self.client = client
-        self.loop = loop
-        self.message = message
+        client = self.client
+        loop = self.loop
+        message = self.message
         
     @asyncio.coroutine
     def do_command(self):
-        yield from client.send_message(client.message.channel, "Doing command: %s" % self.message.split(" ")[0])
+        yield from client.send_message(client.message.channel, "Doing command: %s" % message.split(" ")[0])
         output = handle_outgoing(command, loop)
         print(output)
 
