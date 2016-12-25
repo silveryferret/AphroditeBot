@@ -24,27 +24,27 @@ def parse_command(message, client, loop):
     if message.content.startswith(triggerString) == False:
         return BotCommands.DoNothing(client, loop, message)
 
-    if command == "ping":
+    if command[0] == "ping":
         return BotCommands.Ping(client, loop, message)
-    elif command == "players":
+    elif command[0] == "players":
         return BotCommands.Players(client, loop, message)
-    elif command == "status":
+    elif command[0] == "status":
         return BotCommands.Status(client, loop, message)
-    elif command == "manifest":
+    elif command[0] == "manifest":
         return BotCommands.Manifest(client, loop, message)
-    elif command == "revision":
+    elif command[0] == "revision":
         return BotCommands.Revision(client, loop, message)
-    elif command == "laws":
+    elif command[0] == "laws":
         return BotCommands.Laws(client, loop, message)
-    elif command == "info":
+    elif command[0] == "info":
         return BotCommands.Info(client, loop, message)
-    elif command == "msg":
+    elif command[0] == "msg":
         return BotCommands.AdminMsg(client, loop, message)
-    elif command == "notes":
+    elif command[0] == "notes":
         return BotCommands.Notes(client, loop, message)
-    elif command == "age":
+    elif command[0] == "age":
         return BotCommands.Age(client, loop, message)
-    elif command == "help":
+    elif command[0] == "help":
         return BotCommands.Help(client, loop, message)
     else:
         return BotCommands.Command(client, loop, message)

@@ -11,12 +11,12 @@ token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
 ahelpID = "260863607661658112"
 mainID = "260863628582977547"
 triggerString = "!"
+commskey = "test"
 
 def format_packet(msg):
     return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
-    b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + urllib.parse.urlunparse("&\"key\"=\"key\"") + b"\x00"
+    b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
 
-@asyncio.coroutine
 def handle_outgoing(payload, loop):
 
     
@@ -39,13 +39,17 @@ def handle_outgoing(payload, loop):
 
 def get_command(messageObj):
 
+    commandstring = ""
+    parameter = ""
+    cmdMsg = ""
+    
     i = messageObj.content.strip(triggerString)
-    command = i.split(" ")[0]
+    commandstring = i.split(" ")[0]
     if len(i.split(" ")) >= 2:
         parameter = i.split(" ")[1]
         if len(i.split(" ", maxsplit=2)) >= 3:
             cmdMsg = i.split(" ", maxsplit=2)[2]
-
+    command = (commandstring, parameter, cmdMsg)
     return command
 
 @asyncio.coroutine
@@ -64,7 +68,9 @@ class Command(object):
     @asyncio.coroutine
     def do_command(self):
         yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
-        command = get_command(self.message)
+        command = get_command(self.message)[0]
+        command = self.message.content.strip(triggerString)
+        print(command[0])
         output = yield from handle_outgoing(command, self.loop)
         print(output)
 
@@ -78,7 +84,7 @@ class Ping(Command):
     @asyncio.coroutine
     def do_command(self):
         try:
-            command = get_command(self.message)
+            command = get_command(self.message)[0]
             yield from handle_outgoing(command, self.loop)
             yield from self.client.send_message(self.message.channel, "Server is online.")
         except OSError:
@@ -222,7 +228,6 @@ class Revision(Command):
             revision = yield from handle_outgoing(command, self.loop)
             revision = yield from parse_dict(revision)
             revision = urllib.parse.parse_qs(revision)
-            print(revision)
             revisionMsg = "```"
             revisionMsg += "Date:                 " + revision['date'][0] + "\r\n"
             revisionMsg += "Revision:             " + revision['revision'][0] + "\r\n"
@@ -231,17 +236,9 @@ class Revision(Command):
             revisionMsg += "Dream Maker version:  " + revision['dm_version'][0] + "\r\n"
             revisionMsg += "Branch:               " + revision['branch'][0] + "\r\n"
             revisionMsg += "```"
-            print(revision)
             yield from self.client.send_message(self.message.channel, revisionMsg)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
-            
-class Laws(Command):
-    
-    def __init__(self, client, loop, message):
-        self.client = client
-        self.loop = loop
-        self.message = message
 
 class Info(Command):
 
@@ -249,6 +246,28 @@ class Info(Command):
         self.client = client
         self.loop = loop
         self.message = message
+        
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            commandtup = get_command(self.message)
+            command = "?info=" + commandtup[1]
+            command += ";key=" + commskey
+            info = yield from handle_outgoing(command, self.loop)
+            if info == b'No matches':
+                yield from self.client.send_message(self.message.channel, "No matches.")
+            else:
+                print(info)
+                print("")
+                info = info.decode("utf8")
+                print(info)
+                print("")
+                info = urllib.parse.parse_qs(info)
+                #info = ast.literal_eval(info)
+                print(info)
+
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class AdminMsg(Command):
 
@@ -256,6 +275,21 @@ class AdminMsg(Command):
         self.client = client
         self.loop = loop
         self.message = message
+        
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            commandtup = get_command(self.message)
+            author = self.message.author
+            command = "?adminmsg=" + commandtup[1]
+            command += ";msg=" + commandtup[2]
+            command += ";key=" + commskey
+            command += ";sender=" + author.nick
+            confirmation = yield from handle_outgoing(command, self.loop)
+            print(confirmation)
+            
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class Notes(Command):
 
