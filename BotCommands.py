@@ -31,7 +31,7 @@ def handle_outgoing(payload, loop):
 
     packetLength = yield from reader.read(2)
     packetLength = int.from_bytes(packetLength, "big")
-    received = yield from reader.read(packetLength)
+    received = yield from reader.read(2048)
     received = received[1:-1]
 
     writer.close()
@@ -47,25 +47,22 @@ def get_command(messageObj):
             cmdMsg = i.split(" ", maxsplit=2)[2]
 
     return command
-    
-def parse_status(queryString):
 
-    statusDict = urllib.parse.parse_qs(queryString)
-    for key in statusDict:
-        if "version" in key:
-            version = statusDict[key]
-        if "mode" in key:
-            gamemode = statusDict[key]
-        if "players" in key:
-            playercount = statusDict[key]
-        if "admins" in key:
-            admincount = statusDict[key]
-        if "player" in key:
-            playerList += statusDict[key]
-        if "stationtime" in key:
-            stationTime = statusDict[key]
-        if "roundduration" in key:
-            roundDuration = statusDict[key]
+@asyncio.coroutine
+def parse_status(reader):
+
+   # packetLength = reader.read(2)
+    #print(packetLength)
+    #packetLength = int.from_bytes(packetLength, "big")
+    #print(packetLength)
+    #queryString = yield from reader.read(packetLength)
+    #print(queryString)
+    #queryString = queryString[1:-1]
+    #print(queryString)
+    decodedDict = reader.decode()
+    statusDict = urllib.parse.parse_qs(decodedDict)
+    print(statusDict)
+    return statusDict
 
 class Command(object):
     
@@ -79,7 +76,7 @@ class Command(object):
         yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
         command = get_command(self.message)
         output = yield from handle_outgoing(command, self.loop)
-        output = output.decode()
+        #output = output.decode()
         print(output)
 
 class Ping(Command):
@@ -104,6 +101,16 @@ class Players(Command):
         self.client = client
         self.loop = loop
         self.message = message
+        
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            command = "status"
+            status = yield from handle_outgoing(command, self.loop)
+            status = yield from parse_status(status)
+            yield from self.client.send_message(self.message.channel, "Players online: %s" % status["players"][0])
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class Status(Command):
 
@@ -111,7 +118,43 @@ class Status(Command):
         self.client = client
         self.loop = loop
         self.message = message
-
+        
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            command = "status"
+            status = yield from handle_outgoing(command, self.loop)
+            status = yield from parse_status(status)
+            version = status["version"][0]
+            admins = status["admins"][0]
+            playercount = status["players"][0]
+            roundduration = status["roundduration"][0]
+            stationtime = status["stationtime"][0]
+            playerList = []
+            for key in status:
+                if "player" in key and not "players" in key:
+                    print(key)
+                    playerList += status[key][0]
+            print(playerList)
+            statusMsg = "Status: \r\n"
+            statusMsg += "\r\n"
+            statusMsg += "Players online: %s\r" % playercount
+            statusMsg += "Admins online: %s\r\n" % admins
+            statusMsg += "Round duration: %s\r\n" % roundduration
+            statusMsg += "Station time: %s\r\n" % stationtime
+            statusMsg += "\r\n"
+            statusMsg += "Players:\r\n"
+            statusMsg += "\r\n"            
+            
+            for player in playerList:
+                print(player)
+                statusMsg = statusMsg + player + "\r\n"
+            print(statusMsg)
+            yield from self.client.send_message(self.message.channel, statusMsg)
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
+        
+        
 class Manifest(Command):
 
     def __init__(self, client, loop, message):
