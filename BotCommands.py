@@ -14,7 +14,7 @@ triggerString = "!"
 
 def format_packet(msg):
     return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
-    b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
+    b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + urllib.parse.urlunparse("&\"key\"=\"key\"") + b"\x00"
 
 @asyncio.coroutine
 def handle_outgoing(payload, loop):
