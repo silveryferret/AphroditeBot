@@ -33,6 +33,7 @@ def handle_outgoing(payload, loop):
     packetLength = int.from_bytes(packetLength, "big")
     received = yield from reader.read(packetLength)
     received = received[1:-1]
+    received = received.decode("utf8")
 
     writer.close()
     return received
@@ -51,12 +52,6 @@ def get_command(messageObj):
             cmdMsg = i.split(" ", maxsplit=2)[2]
     command = (commandstring, parameter, cmdMsg)
     return command
-
-@asyncio.coroutine
-def parse_dict(reader):
-
-    decodedDict = reader.decode()
-    return decodedDict
 
 class Command(object):
     
@@ -102,7 +97,6 @@ class Players(Command):
         try:
             command = "status"
             status = yield from handle_outgoing(command, self.loop)
-            status = yield from parse_status(status)
             yield from self.client.send_message(self.message.channel, "Players online: %s" % status["players"][0])
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
@@ -119,7 +113,6 @@ class Status(Command):
         try:
             command = "status"
             status = yield from handle_outgoing(command, self.loop)
-            status = yield from parse_dict(status)
             status = urllib.parse.parse_qs(status)
             version = status["version"][0]
             admins = status["admins"][0]
@@ -159,7 +152,6 @@ class Manifest(Command):
         try:
             command = "manifest"
             manifest = yield from handle_outgoing(command, self.loop)
-            manifest = yield from parse_dict(manifest)
             manifest = ast.literal_eval(manifest)
             manifestMsg = "```"
             for departments in manifest:
@@ -226,7 +218,6 @@ class Revision(Command):
         try:
             command = "revision"
             revision = yield from handle_outgoing(command, self.loop)
-            revision = yield from parse_dict(revision)
             revision = urllib.parse.parse_qs(revision)
             revisionMsg = "```"
             revisionMsg += "Date:                 " + revision['date'][0] + "\r\n"
@@ -257,11 +248,6 @@ class Info(Command):
             if info == b'No matches':
                 yield from self.client.send_message(self.message.channel, "No matches.")
             else:
-                print(info)
-                print("")
-                info = info.decode("utf8")
-                print(info)
-                print("")
                 info = urllib.parse.parse_qs(info)
                 #info = ast.literal_eval(info)
                 print(info)
