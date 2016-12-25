@@ -4,9 +4,9 @@ import struct
 import ast
 import urllib.parse
 
-host = "visiblebulge.space"
+host = "localhost"
 port = 45678
-gameport = 8000
+gameport = 61926
 token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
 ahelpID = "260863607661658112"
 mainID = "260863628582977547"
@@ -31,7 +31,7 @@ def handle_outgoing(payload, loop):
 
     packetLength = yield from reader.read(2)
     packetLength = int.from_bytes(packetLength, "big")
-    received = yield from reader.read(2048)
+    received = yield from reader.read(packetLength)
     received = received[1:-1]
 
     writer.close()
@@ -49,20 +49,10 @@ def get_command(messageObj):
     return command
 
 @asyncio.coroutine
-def parse_status(reader):
+def parse_dict(reader):
 
-   # packetLength = reader.read(2)
-    #print(packetLength)
-    #packetLength = int.from_bytes(packetLength, "big")
-    #print(packetLength)
-    #queryString = yield from reader.read(packetLength)
-    #print(queryString)
-    #queryString = queryString[1:-1]
-    #print(queryString)
     decodedDict = reader.decode()
-    statusDict = urllib.parse.parse_qs(decodedDict)
-    print(statusDict)
-    return statusDict
+    return decodedDict
 
 class Command(object):
     
@@ -76,7 +66,6 @@ class Command(object):
         yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
         command = get_command(self.message)
         output = yield from handle_outgoing(command, self.loop)
-        #output = output.decode()
         print(output)
 
 class Ping(Command):
@@ -124,7 +113,8 @@ class Status(Command):
         try:
             command = "status"
             status = yield from handle_outgoing(command, self.loop)
-            status = yield from parse_status(status)
+            status = yield from parse_dict(status)
+            status = urllib.parse.parse_qs(status)
             version = status["version"][0]
             admins = status["admins"][0]
             playercount = status["players"][0]
@@ -133,12 +123,9 @@ class Status(Command):
             playerList = []
             for key in status:
                 if "player" in key and not "players" in key:
-                    print(key)
-                    playerList += status[key][0]
-            print(playerList)
-            statusMsg = "Status: \r\n"
+                    playerList.append(status[key][0])
+            statusMsg = "```Status: \r\n"
             statusMsg += "\r\n"
-            statusMsg += "Players online: %s\r" % playercount
             statusMsg += "Admins online: %s\r\n" % admins
             statusMsg += "Round duration: %s\r\n" % roundduration
             statusMsg += "Station time: %s\r\n" % stationtime
@@ -147,9 +134,8 @@ class Status(Command):
             statusMsg += "\r\n"            
             
             for player in playerList:
-                print(player)
                 statusMsg = statusMsg + player + "\r\n"
-            print(statusMsg)
+            statusMsg += "Players online: %s\r```" % playercount
             yield from self.client.send_message(self.message.channel, statusMsg)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
@@ -161,6 +147,67 @@ class Manifest(Command):
         self.client = client
         self.loop = loop
         self.message = message
+        
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            command = "manifest"
+            manifest = yield from handle_outgoing(command, self.loop)
+            manifest = yield from parse_dict(manifest)
+            manifest = ast.literal_eval(manifest)
+            manifestMsg = "```"
+            for departments in manifest:
+                if departments == "heads":
+                    manifestMsg += "Command:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                        manifestMsg += name + " - " + position + "\r\n"
+                    manifestMsg += "\r\n"
+                if departments == "sec":
+                    manifestMsg += "Security:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                        manifestMsg += name + " - " + position + "\r\n"
+                    manifestMsg += "\r\n"
+                if departments == "eng":
+                    manifestMsg += "Engineering:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                        manifestMsg += name + " - " + position + "\r\n"
+                    manifestMsg += "\r\n"
+                if departments == "med":
+                    manifestMsg += "Medical:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                        manifestMsg += name + " - " + position + "\r\n"
+                    manifestMsg += "\r\n"
+                if departments == "sci":
+                    manifestMsg += "Science:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                        manifestMsg += name + " - " + position + "\r\n"
+                    manifestMsg += "\r\n"
+                if departments == "car":
+                    manifestMsg += "Cargo:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                        manifestMsg += name + " - " + position + "\r\n"
+                    manifestMsg += "\r\n"
+                if departments == "civ":
+                    manifestMsg += "Civilian:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                    manifestMsg += "\r\n"
+                if departments == "bots":
+                    manifestMsg += "Silicon:\r\n"
+                    for name in manifest[departments]:
+                        position = manifest[departments][name]
+                        manifestMsg += name + " - " + position + "\r\n"
+            manifestMsg += "```"
+                        
+            yield from self.client.send_message(self.message.channel, manifestMsg)
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class Revision(Command):
 
@@ -168,7 +215,27 @@ class Revision(Command):
         self.client = client
         self.loop = loop
         self.message = message
-
+        
+    def do_command(self):
+        try:
+            command = "revision"
+            revision = yield from handle_outgoing(command, self.loop)
+            revision = yield from parse_dict(revision)
+            revision = urllib.parse.parse_qs(revision)
+            print(revision)
+            revisionMsg = "```"
+            revisionMsg += "Date:                 " + revision['date'][0] + "\r\n"
+            revisionMsg += "Revision:             " + revision['revision'][0] + "\r\n"
+            revisionMsg += "Game ID:              " + revision['gameid'][0] + "\r\n"
+            revisionMsg += "Dream Daemon version: " + revision['dd_version'][0] + "\r\n"
+            revisionMsg += "Dream Maker version:  " + revision['dm_version'][0] + "\r\n"
+            revisionMsg += "Branch:               " + revision['branch'][0] + "\r\n"
+            revisionMsg += "```"
+            print(revision)
+            yield from self.client.send_message(self.message.channel, revisionMsg)
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
+            
 class Laws(Command):
     
     def __init__(self, client, loop, message):
