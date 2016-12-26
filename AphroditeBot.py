@@ -23,22 +23,22 @@ def parse_command(message, client, loop):
     elif command[0] == "revision":
         return BotCommands.Revision(client, loop, message)
     elif command[0] == "info":
-        if BotCommand.has_perms(message.author) == True:
+        if BotCommands.has_perms(message.author) == True:
             return BotCommands.Info(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
     elif command[0] == "msg":
-        if BotCommand.has_perms(message.author):
+        if BotCommands.has_perms(message.author):
             return BotCommands.AdminMsg(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
     elif command[0] == "notes":
-        if BotCommand.has_perms(message.author):
+        if BotCommands.has_perms(message.author):
             return BotCommands.Notes(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
     elif command[0] == "age":
-        if BotCommand.has_perms(message.author):
+        if BotCommands.has_perms(message.author):
             return BotCommands.Age(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)

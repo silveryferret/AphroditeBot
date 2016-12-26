@@ -94,7 +94,7 @@ class Status(Command):
             for key in status:
                 if "player" in key and not "players" in key:
                     playerList.append(status[key][0])
-            statusMsg = "Admins online: %s\r\n" % admins
+            statusMsg = "```Admins online: %s\r\n" % admins
             statusMsg += "Round duration: %s\r\n" % roundduration
             statusMsg += "Station time: %s\r\n" % stationtime
             statusMsg += "\r\n"
@@ -303,12 +303,12 @@ class Help(Command):
         
         helpMsg = ""
         helpMsg += "```Aphrodite Bot Commands:"
-        helpMsg += prepend + "ping                 - checks if server is up"
-        helpMsg += prepend + "status               - status, including round duration, station time, players onling"
-        helpMsg += prepend + "manifest             - shows in round crew manifest"
-        helpMsg += prepend + "info <ckey>          - shows detailed information about ckey"
-        helpMsg += prepend + "msg <ckey> <message> - adminhelps from discord to game"
-        helpMsg += prepend + "notes <ckey>         - get player notes of ckey"
-        helpMsg += prepend + "age <ckey>           - shows player age of ckey"
+        helpMsg += prepend + "ping                 - checks if server is up\r\n"
+        helpMsg += prepend + "status               - status, including round duration, station time, players online\r\n"
+        helpMsg += prepend + "manifest             - shows in round crew manifest\r\n"
+        helpMsg += prepend + "info <ckey>          - shows detailed information about ckey\r\n"
+        helpMsg += prepend + "msg <ckey> <message> - adminhelps from discord to game\r\n"
+        helpMsg += prepend + "notes <ckey>         - get player notes of ckey\r\n"
+        helpMsg += prepend + "age <ckey>           - shows player age of ckey\r\n"
         helpMsg += "```"
         yield from self.client.send_message(self.message.channel, helpMsg)
