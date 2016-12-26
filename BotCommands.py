@@ -302,7 +302,7 @@ class Help(Command):
         prepend = config.triggerString
         
         helpMsg = ""
-        helpMsg += "```Aphrodite Bot Commands:"
+        helpMsg += "```Aphrodite Bot Commands:\r\n"
         helpMsg += prepend + "ping                 - checks if server is up\r\n"
         helpMsg += prepend + "status               - status, including round duration, station time, players online\r\n"
         helpMsg += prepend + "manifest             - shows in round crew manifest\r\n"
