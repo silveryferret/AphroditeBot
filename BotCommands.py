@@ -3,15 +3,7 @@ import asyncio
 import struct
 import ast
 import urllib.parse
-
-host = "visiblebulge.space"
-port = 45678
-gameport = 8000
-token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
-ahelpID = "260863607661658112"
-mainID = "260863628582977547"
-triggerString = "!"
-commskey = "test"
+import config
 
 def format_packet(msg):
     return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
@@ -20,7 +12,7 @@ def format_packet(msg):
 def handle_outgoing(payload, loop):
 
     
-    reader, writer = yield from asyncio.open_connection(host, gameport, loop=loop)
+    reader, writer = yield from asyncio.open_connection(config.host, config.gameport, loop=loop)
     packet = format_packet(payload)
 
     writer.write(packet)
@@ -44,7 +36,7 @@ def get_command(messageObj):
     parameter = ""
     cmdMsg = ""
     
-    i = messageObj.content.strip(triggerString)
+    i = messageObj.content.strip(config.triggerString)
     commandstring = i.split(" ")[0]
     if len(i.split(" ")) >= 2:
         parameter = i.split(" ")[1]
@@ -64,7 +56,7 @@ class Command(object):
     def do_command(self):
         yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
         command = get_command(self.message)[0]
-        command = self.message.content.strip(triggerString)
+        command = self.message.content.strip(config.triggerString)
         print(command[0])
         output = yield from handle_outgoing(command, self.loop)
         print(output)
@@ -127,19 +119,11 @@ class Status(Command):
         
 class Manifest(Command):
         
-    def get_position(self, manifest, departments, manifestMsg):
-        for name in manifest[departments]:
-            print(name)
-            position = manifest[departments][name]
-            print(position)
-            manifestMsg += name + " - " + position + "\r\n"
-        return manifestMsg
-        
-    def get_departments(self, manifest, departments, departmentName, manifestMsg):
+    def fill_departments(self, manifest, departments, departmentName, manifestMsg):
         manifestMsg += departmentName
-        for name in manifest[departments]:
-            print(name)
-            manifestMsg = self.get_position(manifest, departments, manifestMsg)
+        for name in departments:
+            position = departments[name]
+            manifestMsg += name + " - " + position + "\r\n"
         return manifestMsg
         
     @asyncio.coroutine
@@ -149,27 +133,49 @@ class Manifest(Command):
             manifest = yield from handle_outgoing(command, self.loop)
             manifest = ast.literal_eval(manifest)
             manifestMsg = "```"
-            for departments in manifest:
-                if departments == "heads":
-                    manifestMsg = self.get_departments(manifest, departments, "Command:\r\n", manifestMsg)
-                elif departments == "sec":
-                    manifestMsg = self.get_departments(manifest, departments, "Security:\r\n", manifestMsg)
-                elif departments == "eng":
-                    manifestMsg = self.get_departments(manifest, departments, "Engineering:\r\n", manifestMsg)
-                elif departments == "med":
-                    manifestMsg = self.get_departments(manifest, departments, "Medical:\r\n", manifestMsg)
-                elif departments == "sci":
-                    manifestMsg = self.get_departments(manifest, departments, "Science:\r\n", manifestMsg)
-                elif departments == "car":
-                    manifestMsg = self.get_departments(manifest, departments, "Cargo:\r\n", manifestMsg)
-                elif departments == "civ":
-                    manifestMsg = self.get_departments(manifest, departments, "Civilian:\r\n", manifestMsg)
-                elif departments == "bots":
-                    manifestMsg = self.get_departments(manifest, departments, "Silicon:\r\n", manifestMsg)
-            manifestMsg += "```"
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["heads"], "Command:\r\n", manifestMsg)
+                manifestMsg += "\r\n"
+            except KeyError:
+                pass
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["sec"], "Security:\r\n", manifestMsg)
+                manifestMsg += "\r\n"
+            except KeyError:
+                pass
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["eng"], "Engineering:\r\n", manifestMsg)
+                manifestMsg += "\r\n"
+            except KeyError:
+                pass
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["med"], "Medical:\r\n", manifestMsg)
+                manifestMsg += "\r\n"
+            except KeyError:
+                pass
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["sci"], "Science:\r\n", manifestMsg)
+                manifestMsg += "\r\n"
+            except KeyError:
+                pass
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["car"], "Cargo:\r\n", manifestMsg)
+                manifestMsg += "\r\n"
+            except KeyError:
+                pass
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["civ"], "Civilian:\r\n", manifestMsg)
+                manifestMsg += "\r\n"
+            except KeyError:
+                pass
+            try:
+                manifestMsg = self.fill_departments(manifest, manifest["bots"], "Silicon:\r\n", manifestMsg)
+                manifestMsg += "```"
+            except KeyError:
+                pass
             if manifestMsg == "``````":
                 manifestMsg = "No crew found."
-
+            manifestMsg += "```"
             yield from self.client.send_message(self.message.channel, manifestMsg)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
@@ -209,7 +215,7 @@ class Info(Command):
         try:
             commandtup = get_command(self.message)
             command = "?info=" + commandtup[1]
-            command += ";key=" + commskey
+            command += ";key=" + config.commskey
             info = yield from handle_outgoing(command, self.loop)
             if info == "No matches":
                 yield from self.client.send_message(self.message.channel, "No matches.")
@@ -256,7 +262,7 @@ class AdminMsg(Command):
             author = self.message.author
             command = "?adminmsg=" + commandtup[1]
             command += ";msg=" + commandtup[2]
-            command += ";key=" + commskey
+            command += ";key=" + config.commskey
             command += ";sender=" + author.nick
             confirmation = yield from handle_outgoing(command, self.loop)
             yield from self.client.send_message(self.message.channel, confirmation)            
@@ -280,7 +286,7 @@ class Notes(Command):
         try:
             commandtup = get_command(self.message)
             command = "?notes=" + commandtup[1]
-            command += ";key=" + commskey
+            command += ";key=" + config.commskey
             qs = yield from handle_outgoing(command, self.loop)
             confirmation = self.parse(qs)
             confirmation = "```" + confirmation + "```"
@@ -295,7 +301,7 @@ class Age(Command):
         try:
             commandtup = get_command(self.message)
             command = "?age=" + commandtup[1]
-            command += ";key=" + commskey
+            command += ";key=" + config.commskey
             age = yield from handle_outgoing(command, self.loop)
             print(age)
         except OSError:

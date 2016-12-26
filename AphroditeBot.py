@@ -4,14 +4,7 @@ import struct
 import ast
 import urllib.parse
 import BotCommands
-
-host = "localhost"
-port = 45678
-gameport = 61926
-token = "MjYxNDI2NDM1OTcxODc0ODE2.Cz4GvQ.nEJwFbd61MzZ_HXXldhAJgOyeiE"
-ahelpID = "260863607661658112"
-mainID = "260863628582977547"
-triggerString = "!"
+import config
 
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
@@ -21,7 +14,7 @@ def parse_command(message, client, loop):
 
     command = BotCommands.get_command(message)
 
-    if message.content.startswith(triggerString) == False:
+    if message.content.startswith(config.triggerString) == False:
         return BotCommands.DoNothing(client, loop, message)
 
     if command[0] == "ping":
@@ -91,11 +84,11 @@ def handle_queue():
 
 def main():
 
-    serverCoro = asyncio.start_server(handle_incoming, host, port, loop=loop)
+    serverCoro = asyncio.start_server(handle_incoming, config.host, config.port, loop=loop)
     server = loop.run_until_complete(serverCoro)
 
     try:
-        loop.create_task(ourBot.start(token))
+        loop.create_task(ourBot.start(config.token))
         loop.create_task(handle_queue())
         loop.run_forever()
     except KeyboardInterrupt:
