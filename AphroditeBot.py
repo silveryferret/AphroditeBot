@@ -34,8 +34,6 @@ def parse_command(message, client, loop):
         return BotCommands.Manifest(client, loop, message)
     elif command[0] == "revision":
         return BotCommands.Revision(client, loop, message)
-    elif command[0] == "laws":
-        return BotCommands.Laws(client, loop, message)
     elif command[0] == "info":
         return BotCommands.Info(client, loop, message)
     elif command[0] == "msg":
@@ -71,26 +69,6 @@ ourBot = Aphrodite()
 def admin_message(message):
     if message.startswith("Request for Help") or message.startswith("Reply") or message.endswith("no more admins online."):
         return True
-
-@asyncio.coroutine
-def handle_outgoing(payload, loop):
-
-    reader, writer = yield from asyncio.open_connection(host, gameport, loop=loop)
-    packet = format_packet(payload)
-
-    writer.write(packet)
-
-    headerReceived = yield from reader.read(2)
-    if headerReceived != b"\x00\x83":
-        print("Unexpected packet.")
-
-    packetLength = yield from reader.read(2)
-    packetLength = int.from_bytes(packetLength, "big")
-    received = yield from reader.read(packetLength)
-    received = received[1:-1]
-
-    writer.close()
-    return received
 
 @asyncio.coroutine
 def handle_incoming(reader, writer):
