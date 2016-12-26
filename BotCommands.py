@@ -54,12 +54,7 @@ class Command(object):
 
     @asyncio.coroutine
     def do_command(self):
-        yield from self.client.send_message(self.message.channel, "Doing command: %s" % self.message.content.split(" ")[0])
-        command = get_command(self.message)[0]
-        command = self.message.content.strip(config.triggerString)
-        print(command[0])
-        output = yield from handle_outgoing(command, self.loop)
-        print(output)
+        pass
 
 class Ping(Command):
 
@@ -69,17 +64,6 @@ class Ping(Command):
             command = get_command(self.message)[0]
             yield from handle_outgoing(command, self.loop)
             yield from self.client.send_message(self.message.channel, "Server is online.")
-        except OSError:
-            yield from self.client.send_message(self.message.channel, "Server is offline.")
-
-class Players(Command):
-        
-    @asyncio.coroutine
-    def do_command(self):
-        try:
-            command = "status"
-            status = yield from handle_outgoing(command, self.loop)
-            yield from self.client.send_message(self.message.channel, "Players online: %s" % status["players"][0])
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
@@ -100,9 +84,7 @@ class Status(Command):
             for key in status:
                 if "player" in key and not "players" in key:
                     playerList.append(status[key][0])
-            statusMsg = "```Status: \r\n"
-            statusMsg += "\r\n"
-            statusMsg += "Admins online: %s\r\n" % admins
+            statusMsg = "Admins online: %s\r\n" % admins
             statusMsg += "Round duration: %s\r\n" % roundduration
             statusMsg += "Station time: %s\r\n" % stationtime
             statusMsg += "\r\n"
@@ -202,9 +184,6 @@ class Revision(Command):
 
 class Info(Command):
         
-    def print_info(self, info):
-        print(info.encode('utf_8'))
-        
     def parse_damage(self, damage):
         dam = urllib.parse.parse_qs(damage)
         damtup = (dam["oxy"][0], dam["tox"][0], dam["fire"][0], dam["brute"][0], dam["clone"][0], dam["brain"][0])
@@ -220,7 +199,6 @@ class Info(Command):
             if info == "No matches":
                 yield from self.client.send_message(self.message.channel, "No matches.")
             else:
-                self.print_info(info)
                 info = urllib.parse.parse_qs(info)
                 area = info["area"][0]
                 info["area"][0] = area.replace("%ff", "")
@@ -306,9 +284,3 @@ class Age(Command):
             print(age)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
-
-class DoNothing(Command):
-
-    @asyncio.coroutine
-    def do_command(self):
-        pass

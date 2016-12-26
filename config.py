@@ -6,3 +6,4 @@ ahelpID = "000000000000000000"
 mainID = "000000000000000000"
 triggerString = "!"
 commskey = "key"
+perm_roles = ["Administration", "Development"]
