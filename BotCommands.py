@@ -11,7 +11,6 @@ def format_packet(msg):
 
 def handle_outgoing(payload, loop):
 
-    
     reader, writer = yield from asyncio.open_connection(config.host, config.gameport, loop=loop)
     packet = format_packet(payload)
 
@@ -35,7 +34,7 @@ def get_command(messageObj):
     commandstring = ""
     parameter = ""
     cmdMsg = ""
-    
+
     i = messageObj.content.strip(config.triggerString)
     commandstring = i.split(" ")[0]
     if len(i.split(" ")) >= 2:
@@ -45,8 +44,19 @@ def get_command(messageObj):
     command = (commandstring, parameter, cmdMsg)
     return command
 
+def has_perms(user):
+    for i in user.roles:
+        print(i)
+        if str(i) in config.perm_roles:
+            perm = True
+        else:
+            perm = False
+    print(perm)
+    print(config.perm_roles)
+    return perm
+
 class Command(object):
-    
+
     def __init__(self, client, loop, message):
         self.client = client
         self.loop = loop
@@ -68,7 +78,7 @@ class Ping(Command):
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class Status(Command):
-        
+
     @asyncio.coroutine
     def do_command(self):
         try:
@@ -97,17 +107,16 @@ class Status(Command):
             yield from self.client.send_message(self.message.channel, statusMsg)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
-        
-        
+
 class Manifest(Command):
-        
+
     def fill_departments(self, manifest, departments, departmentName, manifestMsg):
         manifestMsg += departmentName
         for name in departments:
             position = departments[name]
             manifestMsg += name + " - " + position + "\r\n"
         return manifestMsg
-        
+
     @asyncio.coroutine
     def do_command(self):
         try:
@@ -163,7 +172,7 @@ class Manifest(Command):
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class Revision(Command):
-        
+
     @asyncio.coroutine
     def do_command(self):
         try:
@@ -188,7 +197,7 @@ class Info(Command):
         dam = urllib.parse.parse_qs(damage)
         damtup = (dam["oxy"][0], dam["tox"][0], dam["fire"][0], dam["brute"][0], dam["clone"][0], dam["brain"][0])
         return damtup
-     
+
     @asyncio.coroutine
     def do_command(self):
         try:
@@ -232,7 +241,7 @@ class Info(Command):
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class AdminMsg(Command):
-        
+
     @asyncio.coroutine
     def do_command(self):
         try:
@@ -246,9 +255,9 @@ class AdminMsg(Command):
             yield from self.client.send_message(self.message.channel, confirmation)            
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
-            
+
 class Notes(Command):
-    
+
     def parse(self, qs):
         qs = qs.strip("+")
         qs = qs.replace("+", " ")
@@ -258,7 +267,7 @@ class Notes(Command):
         qs = qs.replace("%29", ")")
         qs = qs.replace("%2c", ",")
         return qs
-    
+
     @asyncio.coroutine
     def do_command(self):
         try:
@@ -271,9 +280,9 @@ class Notes(Command):
             yield from self.client.send_message(self.message.channel, confirmation)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
-            
+
 class Age(Command):
-    
+
     @asyncio.coroutine
     def do_command(self):
         try:
@@ -284,3 +293,22 @@ class Age(Command):
             print(age)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
+
+class Help(Command):
+
+    @asyncio.coroutine
+    def do_command(self):
+    
+        prepend = config.triggerString
+        
+        helpMsg = ""
+        helpMsg += "```Aphrodite Bot Commands:"
+        helpMsg += prepend + "ping                 - checks if server is up"
+        helpMsg += prepend + "status               - status, including round duration, station time, players onling"
+        helpMsg += prepend + "manifest             - shows in round crew manifest"
+        helpMsg += prepend + "info <ckey>          - shows detailed information about ckey"
+        helpMsg += prepend + "msg <ckey> <message> - adminhelps from discord to game"
+        helpMsg += prepend + "notes <ckey>         - get player notes of ckey"
+        helpMsg += prepend + "age <ckey>           - shows player age of ckey"
+        helpMsg += "```"
+        yield from self.client.send_message(self.message.channel, helpMsg)

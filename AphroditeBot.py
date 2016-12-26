@@ -6,17 +6,6 @@ import config
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
 
-def has_perms(user):
-    for i in user.roles:
-        print(i)
-        if str(i) in config.perm_roles:
-            perm = True
-        else:
-            perm = False
-    print(perm)
-    print(config.perm_roles)
-    return perm
-
 @asyncio.coroutine
 def parse_command(message, client, loop):
 
@@ -34,22 +23,22 @@ def parse_command(message, client, loop):
     elif command[0] == "revision":
         return BotCommands.Revision(client, loop, message)
     elif command[0] == "info":
-        if has_perms(message.author) == True:
+        if BotCommand.has_perms(message.author) == True:
             return BotCommands.Info(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
     elif command[0] == "msg":
-        if has_perms(message.author):
+        if BotCommand.has_perms(message.author):
             return BotCommands.AdminMsg(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
     elif command[0] == "notes":
-        if has_perms(message.author):
+        if BotCommand.has_perms(message.author):
             return BotCommands.Notes(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
     elif command[0] == "age":
-        if has_perms(message.author):
+        if BotCommand.has_perms(message.author):
             return BotCommands.Age(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
