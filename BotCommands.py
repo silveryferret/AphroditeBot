@@ -46,7 +46,6 @@ def get_command(messageObj):
 
 def has_perms(user):
     for i in user.roles:
-        print(i)
         if str(i) in config.perm_roles:
             perm = True
         else:
