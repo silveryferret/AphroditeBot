@@ -68,7 +68,11 @@ class Aphrodite(discord.Client):
 ourBot = Aphrodite()
 
 def admin_message(message):
-    if message.startswith("Request for Help") or message.startswith("Reply") or message.endswith("no more admins online."):
+
+    if message.startswith("Request for Help") \
+        or message.startswith("Reply") \
+        or message.endswith("no more admins online.") \
+        or message.partition("PM")[1] == "PM":
         return True
 
 @asyncio.coroutine

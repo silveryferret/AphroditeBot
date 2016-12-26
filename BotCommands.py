@@ -50,8 +50,6 @@ def has_perms(user):
             perm = True
         else:
             perm = False
-    print(perm)
-    print(config.perm_roles)
     return perm
 
 class Command(object):
