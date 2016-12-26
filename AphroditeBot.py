@@ -2,6 +2,7 @@ import discord
 import asyncio
 import BotCommands
 import config
+import ast
 
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
@@ -85,9 +86,9 @@ def handle_queue():
     queuedMsg = yield from queue.get()
     loop.create_task(handle_queue())
     if admin_message(queuedMsg):
-        yield from ourBot.send_message(ourBot.get_channel(ahelpID), queuedMsg)
+        yield from ourBot.send_message(ourBot.get_channel(config.ahelpID), queuedMsg)
     else:
-        yield from ourBot.send_message(ourBot.get_channel(mainID), queuedMsg)
+        yield from ourBot.send_message(ourBot.get_channel(config.mainID), queuedMsg)
 
 def main():
 
