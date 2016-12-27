@@ -121,48 +121,51 @@ class Manifest(Command):
             manifest = yield from handle_outgoing(command, self.loop)
             manifest = ast.literal_eval(manifest)
             manifestMsg = "```"
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["heads"], "Command:\r\n", manifestMsg)
-                manifestMsg += "\r\n"
-            except KeyError:
-                pass
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["sec"], "Security:\r\n", manifestMsg)
-                manifestMsg += "\r\n"
-            except KeyError:
-                pass
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["eng"], "Engineering:\r\n", manifestMsg)
-                manifestMsg += "\r\n"
-            except KeyError:
-                pass
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["med"], "Medical:\r\n", manifestMsg)
-                manifestMsg += "\r\n"
-            except KeyError:
-                pass
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["sci"], "Science:\r\n", manifestMsg)
-                manifestMsg += "\r\n"
-            except KeyError:
-                pass
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["car"], "Cargo:\r\n", manifestMsg)
-                manifestMsg += "\r\n"
-            except KeyError:
-                pass
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["civ"], "Civilian:\r\n", manifestMsg)
-                manifestMsg += "\r\n"
-            except KeyError:
-                pass
-            try:
-                manifestMsg = self.fill_departments(manifest, manifest["bots"], "Silicon:\r\n", manifestMsg)
-                manifestMsg += "```"
-            except KeyError:
-                pass
-            if manifestMsg == "``````":
+            if manifest == []:
                 manifestMsg = "No crew found."
+            else:    
+                    try:
+                    manifestMsg = self.fill_departments(manifest, manifest["heads"], "Command:\r\n", manifestMsg)
+                    manifestMsg += "\r\n"
+                except KeyError:
+                    pass
+                try:
+                    manifestMsg = self.fill_departments(manifest, manifest["sec"], "Security:\r\n", manifestMsg)
+                    manifestMsg += "\r\n"
+                except KeyError:
+                    pass
+                try:
+                    manifestMsg = self.fill_departments(manifest, manifest["eng"], "Engineering:\r\n", manifestMsg)
+                    manifestMsg += "\r\n"
+                except KeyError:
+                    pass
+                try:
+                    manifestMsg = self.fill_departments(manifest, manifest["med"], "Medical:\r\n", manifestMsg)
+                    manifestMsg += "\r\n"
+                except KeyError:
+                    pass
+                try:
+                    manifestMsg = self.fill_departments(manifest, manifest["sci"], "Science:\r\n", manifestMsg)
+                    manifestMsg += "\r\n"
+                except KeyError:
+                    pass
+                try:
+                    manifestMsg = self.fill_departments(manifest, manifest["car"], "Cargo:\r\n", manifestMsg)
+                    manifestMsg += "\r\n"
+                except KeyError:
+                    pass
+                try:
+                    manifestMsg = self.fill_departments(manifest, manifest["civ"], "Civilian:\r\n", manifestMsg)
+                    manifestMsg += "\r\n"
+                except KeyError:
+                    pass
+                try:
+                    manifestMsg = self.fill_departments(manifest, manifest["bots"], "Silicon:\r\n", manifestMsg)
+                    manifestMsg += "```"
+                except KeyError:
+                    pass
+                if manifestMsg == "``````":
+                    manifestMsg = "No crew found."
             manifestMsg += "```"
             yield from self.client.send_message(self.message.channel, manifestMsg)
         except OSError:
