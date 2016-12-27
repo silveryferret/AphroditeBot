@@ -337,6 +337,7 @@ class Help(Command):
         helpMsg += prepend + "status               - status, including round duration, station time,\r\n"
         helpMsg += "\tplayers online\r\n"
         helpMsg += prepend + "manifest             - shows in round crew manifest\r\n"
+        helpMsg += prepend + "revision             - shows current server revision\r\n"
         if self.message.channel.id == config.ahelpID:
             helpMsg += prepend + "info <ckey>          - shows detailed information about ckey\r\n"
             helpMsg += prepend + "msg <ckey> <message> - adminhelps from discord to game\r\n"
