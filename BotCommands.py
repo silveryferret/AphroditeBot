@@ -332,6 +332,8 @@ class IP(Command):
             commandtup = get_command(self.message)
             command = "?ip=" + commandtup[1]
             command += ";key=" + config.commskey
+            ip = yield from handle_outgoing(command, self.loop)
+            yield from self.client.send_message(self.message.channel, ip)            
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
