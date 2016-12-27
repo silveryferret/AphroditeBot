@@ -43,6 +43,11 @@ def parse_command(message, client, loop):
             return BotCommands.Age(client, loop, message)
         else:
             return BotCommands.Command(client, loop, message)
+    elif command[0] == "ip":
+        if BotCommands.has_perms(message.author):
+            return BotCommands.IP(client, loop, message)
+        else:
+            return BotCommands.Command(client, loop, message)
     elif command[0] == "help":
         return BotCommands.Help(client, loop, message)
     else:

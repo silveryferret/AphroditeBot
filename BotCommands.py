@@ -97,7 +97,7 @@ class Status(Command):
             statusMsg += "\r\n"
             statusMsg += "Players:\r\n"
             statusMsg += "\r\n"            
-            
+
             for player in playerList:
                 statusMsg = statusMsg + player + "\r\n"
             statusMsg += "Players online: %s\r```" % playercount
@@ -192,7 +192,7 @@ class Revision(Command):
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
 class Info(Command):
-        
+
     def parse_damage(self, damage):
         dam = urllib.parse.parse_qs(damage)
         if dam == {}:
@@ -280,11 +280,11 @@ class Notes(Command):
         qs = qs.replace("%5d", "]")
         qs = qs.replace("+", " ")
         return qs
-        
+
     def format_for_sending(self, message):
         message = "```" + message + "```"
         return message
-        
+
     @asyncio.coroutine
     def send(self, qs):
         message = self.parse(qs)
@@ -324,13 +324,24 @@ class Age(Command):
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
+class IP(Command):
+
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            commandtup = get_command(self.message)
+            command = "?ip=" + commandtup[1]
+            command += ";key=" + config.commskey
+        except OSError:
+            yield from self.client.send_message(self.message.channel, "Server is offline.")
+
 class Help(Command):
 
     @asyncio.coroutine
     def do_command(self):
-    
+
         prepend = config.triggerString
-        
+
         helpMsg = ""
         helpMsg += "```Aphrodite Bot Commands:\r\n"
         helpMsg += prepend + "ping                 - checks if server is up\r\n"
