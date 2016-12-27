@@ -281,7 +281,7 @@ class Notes(Command):
             self.send(message)
         else:
             message = "```" + message + "```"
-             yield from self.client.send_message(self.message.channel, message)
+            yield from self.client.send_message(self.message.channel, message)
 
     @asyncio.coroutine
     def do_command(self):
