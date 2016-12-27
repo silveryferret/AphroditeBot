@@ -47,7 +47,7 @@ def get_command(messageObj):
 def has_perms(user):
     for i in user.roles:
         if str(i) in config.perm_roles:
-            perm = True
+            return True
         else:
             perm = False
     return perm
@@ -247,7 +247,7 @@ class AdminMsg(Command):
             command = "?adminmsg=" + commandtup[1]
             command += ";msg=" + commandtup[2]
             command += ";key=" + config.commskey
-            command += ";sender=" + author.nick
+            command += ";sender=" + author.name
             confirmation = yield from handle_outgoing(command, self.loop)
             yield from self.client.send_message(self.message.channel, confirmation)            
         except OSError:
