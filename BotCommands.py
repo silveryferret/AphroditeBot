@@ -124,7 +124,7 @@ class Manifest(Command):
             if manifest == []:
                 manifestMsg = "No crew found."
             else:    
-                    try:
+                try:
                     manifestMsg = self.fill_departments(manifest, manifest["heads"], "Command:\r\n", manifestMsg)
                     manifestMsg += "\r\n"
                 except KeyError:
