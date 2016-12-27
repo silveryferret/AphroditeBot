@@ -195,7 +195,10 @@ class Info(Command):
         
     def parse_damage(self, damage):
         dam = urllib.parse.parse_qs(damage)
-        damtup = (dam["oxy"][0], dam["tox"][0], dam["fire"][0], dam["brute"][0], dam["clone"][0], dam["brain"][0])
+        if dam == {}:
+            damtup = ("Not living", "Not living", "Not living", "Not living", "Not living", "Not living")
+        else:
+            damtup = (dam["oxy"][0], dam["tox"][0], dam["fire"][0], dam["brute"][0], dam["clone"][0], dam["brain"][0])
         return damtup
 
     @asyncio.coroutine
