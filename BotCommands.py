@@ -264,6 +264,21 @@ class Notes(Command):
         qs = qs.replace("%29", ")")
         qs = qs.replace("%2c", ",")
         return qs
+        
+    def format_for_sending(self, message):
+        message = "```" + message + "```"
+        return message
+        
+    def send(self, qs):
+        message = self.parse(qs)
+        if len(message) > 1994:
+            fmtmessage = self.format_for_sending(message[1994:])
+            yield from self.client.send_message(self.message.channel, fmtmessage)
+            message = message[1994:]
+            self.send(message)
+        else:
+            message = "```" + message + "```"
+             yield from self.client.send_message(self.message.channel, message)
 
     @asyncio.coroutine
     def do_command(self):
@@ -272,9 +287,7 @@ class Notes(Command):
             command = "?notes=" + commandtup[1]
             command += ";key=" + config.commskey
             qs = yield from handle_outgoing(command, self.loop)
-            confirmation = self.parse(qs)
-            confirmation = "```" + confirmation + "```"
-            yield from self.client.send_message(self.message.channel, confirmation)
+            send(qs)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
