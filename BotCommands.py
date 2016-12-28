@@ -94,13 +94,7 @@ class Status(Command):
             statusMsg = "```Admins online: %s\r\n" % admins
             statusMsg += "Round duration: %s\r\n" % roundduration
             statusMsg += "Station time: %s\r\n" % stationtime
-            statusMsg += "\r\n"
-            statusMsg += "Players:\r\n"
-            statusMsg += "\r\n"            
-
-            for player in playerList:
-                statusMsg = statusMsg + player + "\r\n"
-            statusMsg += "Players online: %s\r```" % playercount
+            statusMsg += "Players online: %s\r\n```" % playercount
             yield from self.client.send_message(self.message.channel, statusMsg)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
@@ -118,11 +112,11 @@ class Players(Command):
             for key in status:
                 if "player" in key and not "players" in key:
                     playerList.append(status[key][0])
-            playerList = sorted(playerlist)
+            playerList = sorted(playerList)
+            playerMsg = "```"
             for player in playerList:
                 playerMsg = playerMsg + player + "\r\n"
-
-            playerMsg += "Players online: %s\r```" % playercount
+            playerMsg += "\r\nPlayers online: %s```" % playercount
             yield from self.client.send_message(self.message.author, playerMsg)
         except OSError:
             yield from self.client.send_message(self.message.author, "Server is offline.")
@@ -371,12 +365,14 @@ class Help(Command):
         helpMsg += prepend + "ping                 - checks if server is up\r\n"
         helpMsg += prepend + "status               - status, including round duration, station time,\r\n"
         helpMsg += "\tplayers online\r\n"
-        helpMsg += prepend + "manifest             - shows in round crew manifest\r\n"
+        helpMsg += prepend + "players              - PMs you a message of all players on server"
+        helpMsg += prepend + "manifest             - PMs you a message of the in round crew manifest\r\n"
         helpMsg += prepend + "revision             - shows current server revision\r\n"
         if self.message.channel.id == config.ahelpID:
             helpMsg += prepend + "info <ckey>          - shows detailed information about ckey\r\n"
             helpMsg += prepend + "msg <ckey> <message> - adminhelps from discord to game\r\n"
             helpMsg += prepend + "notes <ckey>         - get player notes of ckey\r\n"
             helpMsg += prepend + "age <ckey>           - shows player age of ckey\r\n"
+            helpMsg += prepend + "ip <ckey>            - shows IP of ckey"
         helpMsg += "```"
         yield from self.client.send_message(self.message.channel, helpMsg)

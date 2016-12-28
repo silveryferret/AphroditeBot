@@ -19,6 +19,8 @@ def parse_command(message, client, loop):
         return BotCommands.Ping(client, loop, message)
     elif command[0] == "status":
         return BotCommands.Status(client, loop, message)
+    elif command[0] == "players":
+        return BotCommands.Players(client, loop, message)
     elif command[0] == "manifest":
         return BotCommands.Manifest(client, loop, message)
     elif command[0] == "revision":
