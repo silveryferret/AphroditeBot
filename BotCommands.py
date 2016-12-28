@@ -105,6 +105,28 @@ class Status(Command):
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
+class Players(Command):
+
+    @asyncio.coroutine
+    def do_command(self):
+        try:
+            command = "status"
+            status = yield from handle_outgoing(command, self.loop)
+            status = urllib.parse.parse_qs(status)
+            playercount = status["players"][0]
+            playerList = []
+            for key in status:
+                if "player" in key and not "players" in key:
+                    playerList.append(status[key][0])
+            playerList = sorted(playerlist)
+            for player in playerList:
+                playerMsg = playerMsg + player + "\r\n"
+
+            playerMsg += "Players online: %s\r```" % playercount
+            yield from self.client.send_message(self.message.author, playerMsg)
+        except OSError:
+            yield from self.client.send_message(self.message.author, "Server is offline.")
+
 class Manifest(Command):
 
     def fill_departments(self, manifest, departments, departmentName, manifestMsg):
@@ -167,7 +189,7 @@ class Manifest(Command):
                 if manifestMsg == "``````":
                     manifestMsg = "No crew found."
             manifestMsg += "```"
-            yield from self.client.send_message(self.message.channel, manifestMsg)
+            yield from self.client.send_message(self.message.author, manifestMsg)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
 
