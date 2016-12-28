@@ -97,6 +97,10 @@ def handle_queue():
 
     queuedMsg = yield from queue.get()
     loop.create_task(handle_queue())
+    if queuedMsg == "Round has started with no admins online." \
+        or queuedMsg.endswith("no more admins online.") \
+        or "All admins AFK" in queuedMsg:
+        queuedMsg = "@here " + queuedMsg
     if admin_message(queuedMsg):
         yield from ourBot.send_message(ourBot.get_channel(config.ahelpID), queuedMsg)
     else:
