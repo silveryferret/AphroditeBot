@@ -113,7 +113,7 @@ class Players(Command):
                 if "player" in key and not "players" in key:
                     playerList.append(status[key][0])
             playerList = sorted(playerList)
-            playerMsg = "```"
+            playerMsg = "```\r\n"
             for player in playerList:
                 playerMsg = playerMsg + player + "\r\n"
             playerMsg += "\r\nPlayers online: %s```" % playercount
