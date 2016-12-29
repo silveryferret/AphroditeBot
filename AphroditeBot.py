@@ -76,6 +76,8 @@ ourBot = Aphrodite()
 
 def admin_message(message):
 
+    if "@here" in message:
+        message = message.strip("@here ")
     if message.startswith("Request for Help") \
         or message.startswith("Reply") \
         or message.endswith("no more admins online.") \
@@ -97,7 +99,7 @@ def handle_queue():
 
     queuedMsg = yield from queue.get()
     loop.create_task(handle_queue())
-    if queuedMsg == "Round has started with no admins online." \
+    if  "Round has started with no admins online." in queuedMsg \
         or queuedMsg.endswith("no more admins online.") \
         or "All admins AFK" in queuedMsg:
         queuedMsg = "@here " + queuedMsg
