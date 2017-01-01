@@ -1,3 +1,9 @@
+import ..config
+import discord
+import asyncio
+import ast
+
+
 class Manifest(Command):
 
     def fill_departments(self, manifest, departments, departmentName, manifestMsg):

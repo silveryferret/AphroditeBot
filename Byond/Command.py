@@ -1,3 +1,8 @@
+import ..config
+import discord
+import asyncio
+import struct
+
 class Command(object):
 
     def __init__(self, client, loop, message):

@@ -1,3 +1,8 @@
+import urllib.parse
+import ..config
+import discord
+import asyncio
+
 class Players(Command):
 
     @asyncio.coroutine

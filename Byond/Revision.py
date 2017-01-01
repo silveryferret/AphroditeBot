@@ -1,3 +1,7 @@
+import asyncio
+import discord
+import urllib.parse
+
 class Revision(Command):
 
     @asyncio.coroutine

@@ -1,3 +1,19 @@
+import asyncio
+import discord
+import ..config
+import ..Byond/AdminMsg
+import ..Byond/Age
+import ..Byond/Command
+import ..Byond/Info
+import ..Byond/IP
+import ..Byond/Manifest
+import ..Byond/Notes
+import ..Byond/Ping
+import ..Byond/Players
+import ..Byond/Revision
+import ..Byond/Status
+
+
 class Aphrodite(discord.Client):
 
     def get_command(self, messageObj):

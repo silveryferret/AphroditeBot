@@ -1,3 +1,7 @@
+import asyncio
+import discord
+import ..config
+
 class Age(Command):
 
     @asyncio.coroutine

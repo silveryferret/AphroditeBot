@@ -1,3 +1,7 @@
+import asyncio
+import discord
+import ast
+
 def admin_message(message):
 
     if "@here" in message:

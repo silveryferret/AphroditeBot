@@ -1,3 +1,7 @@
+import ..config
+import asyncio
+import discord
+
 class Notes(Command):
 
     def parse(self, qs):

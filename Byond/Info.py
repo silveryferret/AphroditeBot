@@ -1,3 +1,8 @@
+import ..config
+import discord
+import asyncio
+import urllib.parse
+
 class Info(Command):
 
     def parse_damage(self, damage):

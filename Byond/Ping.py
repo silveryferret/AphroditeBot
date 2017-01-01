@@ -1,3 +1,7 @@
+import ..config
+import discord
+import asyncio
+
 class Ping(Command):
 
     @asyncio.coroutine

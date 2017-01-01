@@ -1,3 +1,10 @@
+import ..config
+import urllib.parse
+import discord
+import asyncio
+
+# note for later: think about puting urllib.parse junk into Command.py
+
 class Status(Command):
 
     @asyncio.coroutine

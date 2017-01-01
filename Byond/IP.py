@@ -1,3 +1,7 @@
+import ..config
+import discord
+import asyncio
+
 class IP(Command):
 
     @asyncio.coroutine
