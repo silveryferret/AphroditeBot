@@ -5,30 +5,6 @@ import ast
 import urllib.parse
 import config
 
-def format_packet(msg):
-    return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
-    b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
-
-def handle_outgoing(payload, loop):
-
-    reader, writer = yield from asyncio.open_connection(config.host, config.gameport, loop=loop)
-    packet = format_packet(payload)
-
-    writer.write(packet)
-
-    headerReceived = yield from reader.read(2)
-    if headerReceived != b"\x00\x83":
-        print("Unexpected packet.")
-
-    packetLength = yield from reader.read(2)
-    packetLength = int.from_bytes(packetLength, "big")
-    received = yield from reader.read(packetLength)
-    received = received[1:-1]
-    received = received.decode("utf8")
-
-    writer.close()
-    return received
-
 def get_command(messageObj):
 
     commandstring = ""
@@ -58,6 +34,31 @@ class Command(object):
         self.client = client
         self.loop = loop
         self.message = message
+        
+    def format_packet(msg):
+        return b"\x00\x83" + struct.pack(">H", len(msg) + 6) + \
+            b"\x00\x00\x00\x00\x00" + bytes(msg, "ascii") + b"\x00"
+
+    def get_server_info(payload, loop):
+
+        reader, writer = yield from asyncio.open_connection(config.host, config.gameport, loop=loop)
+        packet = self.format_packet(payload)
+
+        writer.write(packet)
+
+        headerReceived = yield from reader.read(2)
+        if headerReceived != b"\x00\x83":
+            print("Unexpected packet.")
+
+        packetLength = yield from reader.read(2)
+        packetLength = int.from_bytes(packetLength, "big")
+        received = yield from reader.read(packetLength)
+        received = received[1:-1]
+        received = received.decode("utf8")
+
+        writer.close()
+        return received
+
 
     @asyncio.coroutine
     def do_command(self):
@@ -69,7 +70,7 @@ class Ping(Command):
     def do_command(self):
         try:
             command = get_command(self.message)[0]
-            yield from handle_outgoing(command, self.loop)
+            yield from self.get_server_info(command, self.loop)
             yield from self.client.send_message(self.message.channel, "Server is online.")
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
@@ -80,7 +81,7 @@ class Status(Command):
     def do_command(self):
         try:
             command = "status"
-            status = yield from handle_outgoing(command, self.loop)
+            status = yield from self.get_server_info(command, self.loop)
             status = urllib.parse.parse_qs(status)
             version = status["version"][0]
             admins = status["admins"][0]
@@ -105,7 +106,7 @@ class Players(Command):
     def do_command(self):
         try:
             command = "status"
-            status = yield from handle_outgoing(command, self.loop)
+            status = yield from self.get_server_info(command, self.loop)
             status = urllib.parse.parse_qs(status)
             playercount = status["players"][0]
             playerList = []
@@ -134,7 +135,7 @@ class Manifest(Command):
     def do_command(self):
         try:
             command = "manifest"
-            manifest = yield from handle_outgoing(command, self.loop)
+            manifest = yield from self.get_server_info(command, self.loop)
             manifest = ast.literal_eval(manifest)
             manifestMsg = "```"
             if manifest == []:
@@ -193,7 +194,7 @@ class Revision(Command):
     def do_command(self):
         try:
             command = "revision"
-            revision = yield from handle_outgoing(command, self.loop)
+            revision = yield from self.get_server_info(command, self.loop)
             revision = urllib.parse.parse_qs(revision)
             revisionMsg = "```"
             revisionMsg += "Date:                 " + revision['date'][0] + "\r\n"
@@ -223,7 +224,7 @@ class Info(Command):
             commandtup = get_command(self.message)
             command = "?info=" + commandtup[1]
             command += ";key=" + config.commskey
-            info = yield from handle_outgoing(command, self.loop)
+            info = yield from self.get_server_info(command, self.loop)
             if info == "No matches":
                 yield from self.client.send_message(self.message.channel, "No matches.")
             else:
@@ -270,7 +271,7 @@ class AdminMsg(Command):
             command += ";msg=" + commandtup[2]
             command += ";key=" + config.commskey
             command += ";sender=" + author.name
-            confirmation = yield from handle_outgoing(command, self.loop)
+            confirmation = yield from self.get_server_info(command, self.loop)
             yield from self.client.send_message(self.message.channel, confirmation)            
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
@@ -319,7 +320,7 @@ class Notes(Command):
             commandtup = get_command(self.message)
             command = "?notes=" + commandtup[1]
             command += ";key=" + config.commskey
-            qs = yield from handle_outgoing(command, self.loop)
+            qs = yield from self.get_server_info(command, self.loop)
             yield from self.send(qs)
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
@@ -332,7 +333,7 @@ class Age(Command):
             commandtup = get_command(self.message)
             command = "?age=" + commandtup[1]
             command += ";key=" + config.commskey
-            age = yield from handle_outgoing(command, self.loop)
+            age = yield from self.get_server_info(command, self.loop)
             if age == "Ckey not found":
                 yield from self.client.send_message(self.message.channel, age)
             else:
@@ -348,7 +349,7 @@ class IP(Command):
             commandtup = get_command(self.message)
             command = "?ip=" + commandtup[1]
             command += ";key=" + config.commskey
-            ip = yield from handle_outgoing(command, self.loop)
+            ip = yield from self.get_server_info(command, self.loop)
             yield from self.client.send_message(self.message.channel, ip)            
         except OSError:
             yield from self.client.send_message(self.message.channel, "Server is offline.")
