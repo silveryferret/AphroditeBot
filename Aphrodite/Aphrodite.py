@@ -1,9 +1,9 @@
 import asyncio
 import discord
+import Command
 import ..config
 import ..Byond/AdminMsg
 import ..Byond/Age
-import ..Byond/Command
 import ..Byond/Info
 import ..Byond/IP
 import ..Byond/Manifest
@@ -42,50 +42,50 @@ class Aphrodite(discord.Client):
     @asyncio.coroutine
     def parse_command(self, message, client, loop):
 
-        command = BotCommands.get_command(message)
+        command = self.get_command(message)
 
         if message.content.startswith(config.triggerString) == False:
-            return BotCommands.Command(client, loop, message)
+            return Command.Command(client, loop, message)
 
         if command[0] == "ping":
-            return BotCommands.Ping(client, loop, message)
+            return Ping.Ping(client, loop, message)
         elif command[0] == "status":
-            return BotCommands.Status(client, loop, message)
+            return Status.Status(client, loop, message)
         elif command[0] == "players":
-            return BotCommands.Players(client, loop, message)
+            return Players.Players(client, loop, message)
         elif command[0] == "manifest":
-            return BotCommands.Manifest(client, loop, message)
+            return Manifest.Manifest(client, loop, message)
         elif command[0] == "revision":
-            return BotCommands.Revision(client, loop, message)
+            return Revision.Revision(client, loop, message)
         elif command[0] == "info":
-            if BotCommands.has_perms(message.author) == True:
-                return BotCommands.Info(client, loop, message)
+            if self.has_perms(message.author):
+                return Info.Info(client, loop, message)
             else:
-                return BotCommands.Command(client, loop, message)
+                return Command.Command(client, loop, message)
         elif command[0] == "msg":
-            if BotCommands.has_perms(message.author):
-                return BotCommands.AdminMsg(client, loop, message)
+            if self.has_perms(message.author):
+                return AdminMsg.AdminMsg(client, loop, message)
             else:
-                return BotCommands.Command(client, loop, message)
+                return Command.Command(client, loop, message)
         elif command[0] == "notes":
-            if BotCommands.has_perms(message.author):
-                return BotCommands.Notes(client, loop, message)
+            if self.has_perms(message.author):
+                return Notes.Notes(client, loop, message)
             else:
-                return BotCommands.Command(client, loop, message)
+                return Command.Command(client, loop, message)
         elif command[0] == "age":
-            if BotCommands.has_perms(message.author):
-                return BotCommands.Age(client, loop, message)
+            if self.has_perms(message.author):
+                return Age.Age(client, loop, message)
             else:
-                return BotCommands.Command(client, loop, message)
+                return Command.Command(client, loop, message)
         elif command[0] == "ip":
-            if BotCommands.has_perms(message.author):
-                return BotCommands.IP(client, loop, message)
+            if se;f.has_perms(message.author):
+                return IP.IP(client, loop, message)
             else:
-                return BotCommands.Command(client, loop, message)
+                return Command.Command(client, loop, message)
         elif command[0] == "help":
-            return BotCommands.Help(client, loop, message)
+            return Help.Help(client, loop, message)
         else:
-            return BotCommands.Command(client, loop, message)
+            return Command.Command(client, loop, message)
 
 
     @asyncio.coroutine
@@ -100,4 +100,5 @@ class Aphrodite(discord.Client):
         if author.id == self.user.id:
             return
 
-        cmd = yield from self.parse_command(m
+        cmd = yield from self.parse_command(message, self, loop)
+        yield from cmd.do_command()
