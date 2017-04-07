@@ -1,6 +1,5 @@
 import discord
 import asyncio
-import ..config
 
 class Help(Command):
 

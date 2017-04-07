@@ -1,17 +1,17 @@
 import asyncio
 import discord
-import Command
-import ..config
-import ..Byond/AdminMsg
-import ..Byond/Age
-import ..Byond/Info
-import ..Byond/IP
-import ..Byond/Manifest
-import ..Byond/Notes
-import ..Byond/Ping
-import ..Byond/Players
-import ..Byond/Revision
-import ..Byond/Status
+from . import Command
+from .. import config
+from ..Byond import AdminMsg
+from ..Byond import Age
+from ..Byond import Info
+from ..Byond import IP
+from ..Byond import Manifest
+from ..Byond import Notes
+from ..Byond import Ping
+from ..Byond import Players
+from ..Byond import Revision
+from ..Byond import Status
 
 
 class Aphrodite(discord.Client):
@@ -78,7 +78,7 @@ class Aphrodite(discord.Client):
             else:
                 return Command.Command(client, loop, message)
         elif command[0] == "ip":
-            if se;f.has_perms(message.author):
+            if self.has_perms(message.author):
                 return IP.IP(client, loop, message)
             else:
                 return Command.Command(client, loop, message)

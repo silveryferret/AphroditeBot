@@ -1,4 +1,4 @@
-import ..config
+from . import config
 import discord
 import asyncio
 import urllib.parse

@@ -1,5 +1,5 @@
 import urllib.parse
-import ..config
+from . import config
 import discord
 import asyncio
 

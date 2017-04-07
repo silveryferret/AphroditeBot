@@ -1,6 +1,6 @@
 import discord
 import asyncio
-import Aphrodite/Aphrodite
+import Aphrodite.Aphrodite
 import config
 import ast
 
@@ -36,7 +36,7 @@ def handle_queue():
     loop.create_task(handle_queue())
     if  "Round has started with no admins online." in queuedMsg \
         or queuedMsg.endswith("no more admins online.") \
-        or "All admins AFK" in queuedMsg:
+        or queuedMsg.endswith("!!"):
         queuedMsg = "@here " + queuedMsg
     if admin_message(queuedMsg):
         yield from ourBot.send_message(ourBot.get_channel(config.ahelpID), queuedMsg)

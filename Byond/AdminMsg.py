@@ -1,6 +1,6 @@
 import asyncio
 import discord
-import ..config
+from . import config
 
 class AdminMsg(Command):
 
