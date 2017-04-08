@@ -1,0 +1,2 @@
+class ByondParser(object):
+    

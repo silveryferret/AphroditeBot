@@ -1,6 +1,24 @@
 import discord
 import asyncio
-import Aphrodite.Aphrodite
+import ast
+import config
+
+def main():
+    discordBot =
+    byondConsumer =
+    byondClient =
+
+    discordBot.run()
+    byondClient.run()
+
+if __name__ == "__main__":
+    main()
+
+
+"""
+import discord
+import asyncio
+import Aphrodite
 import config
 import ast
 
@@ -57,3 +75,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""

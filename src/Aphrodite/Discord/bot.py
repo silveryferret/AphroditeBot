@@ -1,7 +1,19 @@
+import discord
+
+class Aphrodite(discord.Client):
+
+    def on_message(self):
+        instruction = 
+
+
+
+
+
+"""
 import asyncio
 import discord
 from . import Command
-from .. import config
+from . import config
 from ..Byond import AdminMsg
 from ..Byond import Age
 from ..Byond import Info
@@ -102,3 +114,4 @@ class Aphrodite(discord.Client):
 
         cmd = yield from self.parse_command(message, self, loop)
         yield from cmd.do_command()
+"""
